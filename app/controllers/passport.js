@@ -13,7 +13,7 @@ const logger = require('../lib/logger');
 const jwt = require('../lib/jwt');
 
 module.exports = function (app) {
-    app.use('/passport', router);
+    app.use('/account/passport', router);
 
     router.post('/register', register);
     router.post('/token', loginByToken);
@@ -46,20 +46,20 @@ async function register(req, res, next) {
     // TODO SQL 注入
     // 校验用户名
     if (!userName) {
-        let err = new Error("没有传递参数username!");
+        let err = new Error("请输入用户名！");
         err.code = responseCode.PARAMS_ERROR;
         err.status = 200;
         return next(err);
     }
     // 校验密码
     if (!password) {
-        let err = new Error("没有传递参数password!");
+        let err = new Error("请输入密码！");
         err.code = responseCode.PARAMS_ERROR;
         err.status = 200;
         return next(err);
     }
     if (!nick) {
-        let err = new Error('没有传递参数 nick');
+        let err = new Error('请输入昵称！');
         err.code = responseCode.PARAMS_ERROR;
         err.status = 200;
         return next(err);
@@ -126,16 +126,15 @@ async function loginByUserName(req, res, next) {
     let userName = req.body.username;
     let password = req.body.password;
 
-    // 校验用户名
     if (!userName) {
-        let err = new Error("没有传递参数username!");
+        let err = new Error("请输入用户名！");
         err.code = responseCode.PARAMS_ERROR;
         err.status = 200;
         return next(err);
     }
     // 校验密码
     if (!password) {
-        let err = new Error("没有传递参数password!");
+        let err = new Error("请输入密码！");
         err.code = responseCode.PARAMS_ERROR;
         err.status = 200;
         return next(err);
@@ -162,14 +161,14 @@ async function loginByUserName(req, res, next) {
         // 用户不存在
         if (!user) {
             let err = new Error("用户不存在");
-            err.code = responseCode.SUCCESS;
+            err.code = responseCode.ERROR;
             err.status = 200;
             return next(err);
         }
         // 用户被禁用
         if (!userService.isEnable(user)) {
             let err = new Error("该用户已被封禁！");
-            err.code = responseCode.SUCCESS;
+            err.code = responseCode.ERROR;
             err.status = 200;
             return next(err);
         }

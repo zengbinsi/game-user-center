@@ -35,20 +35,24 @@ async function create(wallet) {
 
 
 /**
- * 更新用户金币
+ * 更新用户钱包
+ *
+ * @param {Number} uid 用户id
+ * @param {Object} property 要修改的属性
  * */
-async function updateGold(uid, gold) {
-    let wallet = await walletDao.findByUId(uid);
+async function update(uid, property) {
+    let wallet = await findByUId(uid);
     let nowTimeStamp = parseInt(new Date().getTime() / 1000);
 
-    wallet.gold = gold;
+    if (property.gold != null && property.gold !== undefined) {
+        wallet.gold = property.gold;
+    }
     wallet.updated_at = nowTimeStamp;
-
-    return await wallet.save();
+    return wallet.save();
 }
 
 let walletDao = {
-    updateGold: updateGold,
+    update: update,
     create: create,
     findByUId: findByUId
 };

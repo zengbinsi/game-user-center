@@ -24,6 +24,7 @@
     "morgan": "^1.6.1",
     "mysql": "^2.8.0",
     "mysql2": "^1.5.1",
+    "nodejieba": "^2.2.5",
     "query-string": "^5.0.1",
     "redis": "^2.8.0",
     "sequelize": "^3.5.1",

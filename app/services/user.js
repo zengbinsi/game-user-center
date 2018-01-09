@@ -2,31 +2,27 @@
  * 用户 Services
  *
  * */
-
-const userDao = require('../dao/user');
-const loginHistoryDao = require('../dao/login_history');
-
-const walletDao = require('../dao/wallet');
-const registerConfigDao = require('../dao/register_config');
-const walletLogDao = require('../dao/wallet_log');
-
-const walletLogModel = require('../models').walletLog;
 const userModel = require('../models').user;
-
 
 const logger = require('../lib/logger');
 const jwt = require('../lib/jwt');
 const util = require('../lib/util');
 
-const walletService = require('./wallet');
-
-const userConstant = require('../constants/user');
 const uuid = require('uuid/v4');
 
+const userDao = require('../dao/user');
+const loginHistoryDao = require('../dao/login_history');
+
+const userConstant = require('../constants/user');
 const responseCode = require('../constants/response_code');
 
+const walletService = require('./wallet');
+const safeBoxService = require('./safe_box');
+const sensitiveService = require('./sensitive_words');
+const gameWeightService = require('./game_weight');
+
 /**
- * 注册微信用户
+ * 注册用户
  *
  * @param {String} username      用户名
  * @param {String} password      密码
@@ -35,8 +31,15 @@ const responseCode = require('../constants/response_code');
  * @param {Object} clientInfo    客户端信息
  * */
 async function register(username, password, nick, eid, clientInfo) {
+    // 敏感词
+    let sensitiveResult = sensitiveService.checkSensitiveWord(nick);
+    if (sensitiveResult) {
+        let err = new Error("昵称包含敏感词！");
+        err.code = responseCode.ERROR;
+        err.status = 200;
+        throw err;
+    }
     // 判断username是否已被使用
-    // 判断昵称是否已被使用
     let userNameResult = await userDao.findByUserName(username);
     // 用户名已被使用
     if (userNameResult) {
@@ -63,14 +66,19 @@ async function register(username, password, nick, eid, clientInfo) {
         salt: salt,
         nick: nick,
         eid: eid,
+        sex: userConstant.SEX_MEN,
+        type: userConstant.USER_TYPE_NORMAL,
         avatar: userConstant.avatar,
         register_ip: clientInfo.ip,
+        status: userModel.ENABLE,
         register_time: nowTimeStamp,
     };
     let userSaveResult = await userDao.create(user);
     // 初始化钱包
-    await initWallet(userSaveResult.id);
-
+    await walletService.initWallet(userSaveResult.id);
+    // 初始化保险柜
+    await safeBoxService.initSafeBox(userSaveResult.id);
+    await gameWeightService.initGameWeight(userSaveResult.id);
     let wallet = await walletService.getWallet(userSaveResult.id);
     userSaveResult.gold = wallet.gold;
     // 保存登录记录
@@ -161,25 +169,6 @@ async function saveLoginInfo(uid, clientInfo) {
     };
     // 保存登录记录
     return await loginHistoryDao.create(loginHistory);
-}
-
-/**
- * 注册时，初始化钱包
- * */
-async function initWallet(uid) {
-    // 注册配置信息：注册送多少金币
-    let registerConfig = await registerConfigDao.get('gold');
-    let walletLog = {
-        uid: uid,
-        amount: registerConfig.gold,
-        reason: walletLogModel.REASON.REGISTER,
-    };
-    let wallet = {
-        uid: uid,
-        gold: registerConfig.gold
-    };
-    await walletLogDao.insert(walletLog);
-    await walletDao.create(wallet);
 }
 
 let userService = {

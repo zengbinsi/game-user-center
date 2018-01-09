@@ -13,8 +13,8 @@ let sequelize = new Sequelize(
     mysqlConfig.dbname, mysqlConfig.username, mysqlConfig.password, {
         host: mysqlConfig.host,
         dialect: 'mysql',
-        logging: function (sql) {
-        },
+        // logging: function (sql) {
+        // },
         pool: {
             max: 10,
             min: 0,

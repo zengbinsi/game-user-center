@@ -17,6 +17,7 @@ async function findByUId(uid) {
         attributes: [
             'id', 'nick',
             'avatar', 'status',
+            'type',
         ]
     });
 }
@@ -33,6 +34,7 @@ async function findByUserName(userName) {
         attributes: [
             'id', 'nick',
             'avatar', 'status',
+            'type',
         ]
     });
 }
@@ -51,6 +53,7 @@ async function findByUserNamePwd(userName, passWord) {
         attributes: [
             'id', 'nick',
             'avatar', 'status',
+            'type',
         ]
     });
 }
@@ -67,6 +70,7 @@ async function findByNick(nick) {
         attributes: [
             'id', 'nick',
             'avatar', 'status',
+            'type'
         ]
     });
 }
@@ -94,8 +98,7 @@ async function create(user) {
     user.created_at = nowTimeStamp;
     user.updated_at = nowTimeStamp;
 
-    let userResult = await userModel.create(user);
-    return userResult;
+    return await userModel.create(user);
 }
 
 /**
@@ -112,7 +115,6 @@ async function update(uid, props) {
         nick: props.nick || user.nick,
         avatar: props.avatar || user.avatar,
         sex: props.sex || user.sex,
-        status: props.status || user.status,
         updated_at: nowTimeStamp,
     };
     return await user.update(newUser);
