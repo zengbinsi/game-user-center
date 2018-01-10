@@ -171,12 +171,76 @@ async function saveLoginInfo(uid, clientInfo) {
     return await loginHistoryDao.create(loginHistory);
 }
 
+/**
+ * 重置密码
+ * */
+async function resetPassWord(uid) {
+    let defaultPassWord = userConstant.DEFAULT_PASSWORD;
+    // 重置密码
+    let salt = uuid();
+    let cryptoPsw = util.md5Hash(defaultPassWord + salt);
+    return await userDao.updatePassWord(uid, salt, cryptoPsw);
+}
+
+/**
+ * 修改密码
+ *
+ * @param {Number} uid 玩家id
+ * @param {String} oldPassWord 旧密码
+ * @param {String} newPassWord 新密码
+ * */
+async function updatePassWord(uid, oldPassWord, newPassWord) {
+    let user = await userDao.findByUId(uid);
+    if (!user) {
+        return null;
+    }
+    console.log('updatePassWord ', user.salt);
+    console.log('oldPassWord ', oldPassWord);
+    // 判断旧密码是否正确
+    let saltPassWord = util.md5Hash(oldPassWord + user.salt);
+    console.log('saltPassWord ', saltPassWord);
+    if (saltPassWord !== user.password) {
+        let err = new Error('旧密码不正确！');
+        err.code = responseCode.ERROR;
+        err.status = 200;
+        throw err;
+    }
+    // 判断密码格式是否正确
+    if (newPassWord.length < 6 || newPassWord.length > 16) {
+        let err = new Error('新密码格式不正确 （6-16）！');
+        err.code = responseCode.ERROR;
+        err.status = 200;
+        throw err;
+    }
+    // 更新密码
+    let salt = uuid();
+    let newCrytpoPsw = util.md5Hash(newPassWord + salt);
+    return await userDao.updatePassWord(uid, salt, newCrytpoPsw);
+}
+
+/**
+ * 获取玩家信息
+ * @param {Number} uid 玩家id
+ * */
+async function getUserInfo(uid) {
+    let user = await userDao.findByUId(uid);
+    if (!user) {
+        return null;
+    }
+    let wallet = await walletService.getWallet(uid);
+    user.gold = wallet.gold;
+    return user;
+}
+
 let userService = {
     register: register,
     updateById: updateById,
     loginByToken: loginByToken,
     loginByUserNamePsw: loginByUserNamePsw,
     isEnable: isEnable,
+    resetPassWord: resetPassWord,
+    updatePassWord: updatePassWord,
+    getUserInfo: getUserInfo,
 };
 
 module.exports = userService;

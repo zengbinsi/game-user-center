@@ -44,10 +44,10 @@ async function update(uid, property) {
     let wallet = await findByUId(uid);
     let nowTimeStamp = parseInt(new Date().getTime() / 1000);
 
-    if (property.gold != null && property.gold !== undefined) {
+    if (property.gold != null && property.gold !== undefined && property.gold != '') {
         wallet.gold = property.gold;
+        wallet.updated_at = nowTimeStamp;
     }
-    wallet.updated_at = nowTimeStamp;
     return wallet.save();
 }
 

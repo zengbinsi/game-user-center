@@ -35,16 +35,19 @@ async function findById(uid) {
  * */
 async function update(uid, property) {
     let safeBox = await findById(uid);
+
+    let time = parseInt(new Date().getTime() / 1000);
     if (!safeBox) {
         return null;
     }
     if (property.password != null && property.password !== undefined) {
         safeBox.password = property.password;
+        safeBox.updated_at = time;
     }
     if (property.gold != null && property.gold !== undefined) {
         safeBox.gold = property.gold;
+        safeBox.updated_at = time;
     }
-    safeBox.updated_at = parseInt(new Date().getTime() / 1000);
     return await  safeBox.save();
 }
 

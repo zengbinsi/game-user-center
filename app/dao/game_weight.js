@@ -18,17 +18,24 @@ async function create(game_weight) {
  * */
 async function update(uid, property) {
     let gameWeight = await findByUid(uid);
+    if (!gameWeight) {
+        return null;
+    }
+    let time = parseInt(new Date().getTime() / 1000);
     // 当前权重
     if (property.weight !== null && property.weight !== undefined) {
         gameWeight.weight = property.weight;
+        gameWeight.updated_at = time;
     }
     // 最小权重
     if (property.min_weight != null && property.min_weight !== undefined) {
         gameWeight.min_weight = property.min_weight;
+        gameWeight.updated_at = time;
     }
     // 最大权重
     if (property.max_weight != null && property.max_weight !== undefined) {
         gameWeight.max_weight = property.max_weight;
+        gameWeight.updated_at = time;
     }
     return await gameWeight.save();
 }

@@ -105,6 +105,7 @@ async function register(req, res, next) {
             uid: user.id,
             nick: user.nick,
             avatar: user.avatar,
+            sex: user.sex,
             gold: user.gold,
             token: token
         };
@@ -160,7 +161,7 @@ async function loginByUserName(req, res, next) {
         let user = await userService.loginByUserNamePsw(userName, password, clientInfo);
         // 用户不存在
         if (!user) {
-            let err = new Error("用户不存在");
+            let err = new Error("用户名或密码错误！");
             err.code = responseCode.ERROR;
             err.status = 200;
             return next(err);
@@ -172,7 +173,6 @@ async function loginByUserName(req, res, next) {
             err.status = 200;
             return next(err);
         }
-
         // 生成token
         let payload = {
             uid: user.id,
@@ -185,6 +185,7 @@ async function loginByUserName(req, res, next) {
             nick: user.nick,
             avatar: user.avatar,
             gold: user.gold,
+            sex: user.sex,
             token: token
         };
         res.success(data);

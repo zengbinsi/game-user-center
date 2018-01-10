@@ -17,7 +17,8 @@ async function findByUId(uid) {
         attributes: [
             'id', 'nick',
             'avatar', 'status',
-            'type',
+            'type', 'sex',
+            'salt', 'password',
         ]
     });
 }
@@ -34,7 +35,7 @@ async function findByUserName(userName) {
         attributes: [
             'id', 'nick',
             'avatar', 'status',
-            'type',
+            'type', 'sex',
         ]
     });
 }
@@ -53,7 +54,7 @@ async function findByUserNamePwd(userName, passWord) {
         attributes: [
             'id', 'nick',
             'avatar', 'status',
-            'type',
+            'type', 'sex',
         ]
     });
 }
@@ -70,7 +71,7 @@ async function findByNick(nick) {
         attributes: [
             'id', 'nick',
             'avatar', 'status',
-            'type'
+            'type', 'sex'
         ]
     });
 }
@@ -103,31 +104,64 @@ async function create(user) {
 
 /**
  * 修改用户信息
+ *
+ * @param {Number} uid 用户id
+ * @param {Object} props 要修改的属性
  * */
 async function update(uid, props) {
     let nowTimeStamp = parseInt(new Date().getTime() / 1000);
 
-    let user = await this.findByUId(uid);
+    let user = await findByUId(uid);
     if (!user) {
         return null;
     }
-    let newUser = {
-        nick: props.nick || user.nick,
-        avatar: props.avatar || user.avatar,
-        sex: props.sex || user.sex,
-        updated_at: nowTimeStamp,
-    };
-    return await user.update(newUser);
+    if (props.nick) {
+        user.nick = props.nick;
+        user.updated_at = nowTimeStamp;
+    }
+    if (props.avatar) {
+        user.avatar = props.avatar;
+        user.updated_at = nowTimeStamp;
+    }
+    if (props.sex != null && props.sex !== undefined && props.sex !== '') {
+        user.sex = props.sex;
+        user.updated_at = nowTimeStamp;
+    }
+    return await user.save();
+}
+
+/**
+ * 修改密码
+ *
+ * @param {Number} uid 玩家id
+ * @param {String} salt 密码盐
+ * @param {String} password 玩家密码
+ * */
+async function updatePassWord(uid, salt, password) {
+
+    let user = await findByUId(uid);
+    if (!user) {
+        return null;
+    }
+    if (salt != null && salt != undefined) {
+        let time = parseInt(new Date().getTime() / 1000);
+        if (password != null && password != undefined) {
+            user.salt = salt;
+            user.password = password;
+            user.updated_at = time;
+        }
+    }
+    return await user.save();
 }
 
 let userDao = {
-        findByUId: findByUId,
-        create: create,
-        update: update,
-        findByNick: findByNick,
-        findByUserName: findByUserName,
-        findByUserNamePwd: findByUserNamePwd,
-        findUserSalt: findUserSalt
-    }
-;
+    findByUId: findByUId,
+    create: create,
+    update: update,
+    findByNick: findByNick,
+    findByUserName: findByUserName,
+    findByUserNamePwd: findByUserNamePwd,
+    findUserSalt: findUserSalt,
+    updatePassWord: updatePassWord
+};
 module.exports = userDao;

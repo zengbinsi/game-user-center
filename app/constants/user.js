@@ -9,7 +9,8 @@ let userConstant = {
     USER_TYPE_GM: 11,      // 运营人员
     SEX_MEN: 1,
     SEX_WOMEN: 0,
-    REGISTER_GOLD_KEY: 'register_gold'
+    REGISTER_GOLD_KEY: 'register_gold',
+    DEFAULT_PASSWORD: 888888,   // 默认密码，重置密码时使用
 };
 
 module.exports = userConstant;
